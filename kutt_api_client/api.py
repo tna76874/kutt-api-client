@@ -4,6 +4,7 @@
 API Modules
 """
 import requests
+from typing import Optional
 from .models import (
     Link,
     Stats,
@@ -11,6 +12,7 @@ from .models import (
     UpdateLinkRequest,
     DeleteResponse,
     LinkListResponse,
+    GetLinksRequest,
 )
 
 
@@ -29,18 +31,47 @@ class KuttAPI:
         response.raise_for_status()
         return Link(**response.json())
 
-    def update_link(self, link_id: str, payload: UpdateLinkRequest) -> Link:
+    def update_link(self, payload: UpdateLinkRequest) -> Link:
         response = requests.patch(
-            f"{self.base_url}/links/{link_id}", headers=self.headers, json=payload.model_dump_json(exclude_none=True)
+            f"{self.base_url}/links/{str(payload.id)}", headers=self.headers, json=payload.dump_kutt()
         )
         response.raise_for_status()
         return Link(**response.json())
 
-    def get_links(self, limit: int = 100, skip: int = 0, all_links: bool = True) -> LinkListResponse:
-        params = {"limit": limit, "skip": skip, "all": all_links}
-        response = requests.get(f"{self.base_url}/links", headers=self.headers, params=params)
-        response.raise_for_status()
-        return LinkListResponse(**response.json())
+    def get_links(self, request: Optional[GetLinksRequest] = None) -> LinkListResponse:
+        """
+        Holt alle Links von Kutt, auch wenn die API maximal 50 pro Request zurückliefert.
+        Nutzt eine Schleife, um alle Seiten abzufragen.
+        """
+        if request is None:
+            request = GetLinksRequest()
+
+        all_links: List[Link] = []
+        skip = request.skip
+
+        while True:
+            # Nutze dump_kutt, aber überschreibe skip dynamisch
+            params = request.dump_kutt()
+            params['skip'] = skip
+            response = requests.get(f"{self.base_url}/links", headers=self.headers, params=params)
+            response.raise_for_status()
+
+            data = response.json().get('data', [])
+            if not data:  # Abbruch, wenn keine Links mehr kommen
+                break
+
+            # Alle Links in Pydantic-Objekte umwandeln
+            all_links.extend([Link(**item) for item in data])
+
+            # Kutt liefert max. 50, daher skip erhöhen
+            skip += len(data)
+
+        return LinkListResponse(
+            limit=len(all_links),
+            skip=request.skip,
+            total=len(all_links),
+            data=all_links
+        )
 
     def delete_link(self, link_id: str) -> DeleteResponse:
         response = requests.delete(f"{self.base_url}/links/{link_id}", headers=self.headers)

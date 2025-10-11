@@ -76,6 +76,18 @@ class Stats(BaseModel):
 
 # --- Request Models ---
 
+class GetLinksRequest(BaseModel):
+    limit: int = 100
+    skip: int = 0
+    all_links: bool = Field(True, alias="all")
+
+    def dump_kutt(self) -> dict:
+        data = self.model_dump(exclude_none=True, by_alias=True)
+
+        # bool → string für API-Kompatibilität
+        data["all"] = "true" if self.all_links else "false"
+        return data
+
 class CreateLinkRequest(BaseModel):
     target: str
     description: Optional[str] = None
@@ -116,11 +128,23 @@ class CreateLinkRequest(BaseModel):
 
 
 class UpdateLinkRequest(BaseModel):
+    id: UUID
     target: str
     address: str
     description: Optional[str] = None
     expire_in: Optional[str] = None
 
+    def dump_kutt(self) -> dict:
+        """
+        Gibt ein dict für den API-Request an Kutt.it zurück.
+        - Wandelt den booleschen 'reuse'-Wert in 'true'/'false' Strings um.
+        - Sanitized 'customurl' (äöüß → ae/oe/ue/ss usw.).
+        """
+        data = self.model_dump(exclude_none=True)
+
+        data.pop('id')
+        
+        return data
 
 class CreateDomainRequest(BaseModel):
     address: str
