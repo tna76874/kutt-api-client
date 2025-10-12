@@ -4,6 +4,7 @@
 API Modules
 """
 import requests
+import pandas as pd
 from typing import Optional
 from .models import (
     Link,
@@ -52,7 +53,38 @@ class KuttAPI:
         )
         response.raise_for_status()
         return Link(**response.json())
+    
+    def get_links_dataframe(self) -> pd.DataFrame:
+        """
+        Returns all links from the Kutt API as a Pandas DataFrame.
+    
+        This method internally calls `get_links()` to fetch all pages and 
+        converts the result (`LinkListResponse.data`) into a DataFrame.
+    
+        Ensures that the 'id', 'target', and 'link' columns are of type str.
+    
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing all link data. Returns an empty DataFrame if 
+            no links are found.
+        """
+        links_response = self.get_links()
+        data = links_response.model_dump().get("data", [])
+        
+        if not data:
+            return pd.DataFrame()
+    
+        df = pd.DataFrame(data)
+    
+        # Ensure 'id', 'target', 'link' are strings
+        for col in ["id", "target", "link"]:
+            if col in df.columns:
+                df[col] = df[col].astype(str)
+    
+        return df
 
+    
     def get_links(self, request: Optional[GetLinksRequest] = None) -> LinkListResponse:
         """
         Holt alle Links von Kutt, auch wenn die API maximal 50 pro Request zurückliefert.
