@@ -1,34 +1,25 @@
 [build-system]
-requires = ["setuptools>=61","wheel"]
+requires = [ "setuptools>=61", "wheel",]
 build-backend = "setuptools.build_meta"
-
 
 [project]
 name = "kutt-api-client"
-version = "0.1.0"
+version = "0.1.1"
 description = "Lightweight helper library for Kutt Link shortener"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
-authors = [ { name = "LMH", email = "code@hilberg.eu" } ]
-classifiers = [
-"Programming Language :: Python :: 3.11",
-"License :: OSI Approved :: MIT License",
-"Operating System :: OS Independent",
-]
+classifiers = [ "Programming Language :: Python :: 3.11", "License :: OSI Approved :: MIT License", "Operating System :: OS Independent",]
+dependencies = [ "pydantic>=2.11.9", "PyYAML>=6.0.2", "tqdm",]
+[[project.authors]]
+name = "LMH"
+email = "code@hilberg.eu"
 
-
-dependencies = [
-"pydantic>=2.11.9",
-"PyYAML>=6.0.2",
-"tqdm",
-]
-
+[project.license]
+text = "MIT"
 
 [project.urls]
-"Homepage" = "https://github.com/tna76874/kutt-api-client.git"
-
+Homepage = "https://github.com/tna76874/kutt-api-client.git"
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["kutt_api_client*"]
+where = [ ".",]
+include = [ "kutt_api_client*",]

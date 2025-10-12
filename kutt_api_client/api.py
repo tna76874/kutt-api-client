@@ -24,16 +24,31 @@ class KuttAPI:
             # "Content-Type": "application/json"
         }
 
-    def create_link(self, payload: CreateLinkRequest) -> Link:
+    def create_link(self, payload: CreateLinkRequest = None, **kwargs) -> Link:
+        if payload is None:
+            payload = CreateLinkRequest(**kwargs)
+    
+        assert isinstance(payload, CreateLinkRequest), "payload must be an instance of CreateLinkRequest"
+    
         response = requests.post(
-            f"{self.base_url}/links", headers=self.headers, json=payload.dump_kutt()
+            f"{self.base_url}/links",
+            headers=self.headers,
+            json=payload.dump_kutt(),
         )
         response.raise_for_status()
         return Link(**response.json())
 
-    def update_link(self, payload: UpdateLinkRequest) -> Link:
+
+    def update_link(self, payload: UpdateLinkRequest = None, **kwargs) -> Link:
+        if payload is None:
+            payload = UpdateLinkRequest(**kwargs)
+            
+        assert isinstance(payload, UpdateLinkRequest), "payload must be an instance of UpdateLinkRequest"
+    
         response = requests.patch(
-            f"{self.base_url}/links/{str(payload.id)}", headers=self.headers, json=payload.dump_kutt()
+            f"{self.base_url}/links/{str(payload.id)}",
+            headers=self.headers,
+            json=payload.dump_kutt(),
         )
         response.raise_for_status()
         return Link(**response.json())

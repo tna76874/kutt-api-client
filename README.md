@@ -1,20 +1,23 @@
+Alles klar! Ich habe das Beispiel stark vereinfacht, sodass nur **API-Key und Base-URL** übergeben werden, und die Nutzung der `payload`-Objekte weggelassen. Hier ist die aktualisierte README-Version:
+
+---
+
 # Kutt API Client
 
 **Lightweight Python client for the [Kutt](https://kutt.it/) URL shortener API.**
 
-------
+---
 
 ## Features
 
-- Create, update, delete, and list short links
-- Fetch link statistics
-- Fully typed using Pydantic models
-- Easy integration in Python projects
+* Create, update, delete, and list short links
+* Fetch link statistics
+* Fully typed using Pydantic models
+* Easy integration in Python projects
 
-------
+---
 
 ## Installation
-
 
 ```bash
 pip install --upgrade git+https://github.com/tna76874/kutt-api-client.git@main
@@ -34,36 +37,35 @@ Dependencies:
 pip install requests pydantic tqdm PyYAML pytest requests-mock
 ```
 
-------
+---
 
 ## Usage
 
 ```python
 from kutt_api_client import KuttAPI
-from kutt_api_client.models import CreateLinkRequest
 
-# Initialize client with your API key
+# Initialize client with your API key and custom Base URL
 api_key = "YOUR_KUTT_API_KEY"
-client = KuttAPI(api_key)
+base_url = "https://kutt.it/api/v2"
+client = KuttAPI(api_key=api_key, base_url=base_url)
 
 # Create a new short link
-payload = CreateLinkRequest(
-    target="https://www.python.org/",
-    description="Python official website",
-    customurl="python-test",
-    reuse=True
-)
-
-link = client.create_link(payload)
+link = client.create_link(target="https://www.python.org/", customurl="python-test", description="Python official website", reuse=True)
 print("Short link created:", link.link)
 print("Target URL:", link.target)
 
+# Update an existing short link
+updated_link = client.update_link(id=link.id, description="Updated description")
+print("Updated description:", updated_link.description)
+
 # Fetch all links
-links = client.get_links(limit=10)
+links = client.get_links()
 print("Retrieved", links.total, "links")
+for l in links.data:
+    print(l.link, "->", l.target)
 ```
 
-------
+---
 
 ## Testing
 
@@ -78,26 +80,19 @@ export PYTHONPATH=$PYTHONPATH:$(pwd)
 pytest -v
 ```
 
-Example tests include:
-
-- Utility functions (e.g., URL sanitizing)
-- Pydantic model validations
-- API client methods using `requests-mock`
-
-------
+---
 
 ## Models
 
 All request, response, and domain models are included in `kutt_api_client.models`:
 
-- `Link`, `Domain`, `User`
-- `CreateLinkRequest`, `UpdateLinkRequest`, `CreateDomainRequest`
-- `Stats`, `StatsItem`, `StatsItemStats`
-- `DeleteResponse`, `LinkListResponse`
+* `Link`, `Domain`, `User`
+* `CreateLinkRequest`, `UpdateLinkRequest`, `CreateDomainRequest`
+* `Stats`, `StatsItem`, `StatsItemStats`
+* `DeleteResponse`, `LinkListResponse`
 
-------
+---
 
 ## License
 
-see [LICENSE](https://chatgpt.com/c/LICENSE) file.
-
+See [LICENSE](https://chatgpt.com/c/LICENSE) file.
