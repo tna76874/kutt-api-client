@@ -1,7 +1,3 @@
-Alles klar! Ich habe das Beispiel stark vereinfacht, sodass nur **API-Key und Base-URL** übergeben werden, und die Nutzung der `payload`-Objekte weggelassen. Hier ist die aktualisierte README-Version:
-
----
-
 # Kutt API Client
 
 **Lightweight Python client for the [Kutt](https://kutt.it/) URL shortener API.**
